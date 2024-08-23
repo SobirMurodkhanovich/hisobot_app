@@ -23,7 +23,6 @@ class StudentViewSet(ModelViewSet):
 class StudentSumView(APIView):
 
     def get(self, request):
-        # Aggregate the sum of the 'should_give' field for all students
         total_should_give = Student.objects.aggregate(total=Sum('should_give'))['total']
         total_give = Student.objects.aggregate(total=Sum('gave'))['total']
         half_pay = Student.objects.filter(payment_types="half_payment").count()

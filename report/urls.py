@@ -14,5 +14,4 @@ urlpatterns = [
     path('students/debtors/', DebtorListView.as_view(), name='debtor-list'),
     path('students/total-amount-owed/', TotalAmountOwedView.as_view(), name='total-amount-owed'),
     path('teachers/<int:teacher_id>/students/', StudentsByTeacherView.as_view(), name='students-by-teacher'),
-
 ]
