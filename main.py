@@ -1,16 +1,34 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+import requests
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def teacher_list():
+    url = "http://127.0.0.1:8000/teacher/"
+    response = requests.get(url).json()
+    return response
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def student_list():
+    url = "http://127.0.0.1:8000/student/"
+    response = requests.get(url).json()
+    return response
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def create_student(full_name, should_give, gave, payment_types, teacher):
+    url = f"http://127.0.0.1:8000/student/"
+    response = requests.post(url, json={
+        "full_name": full_name,
+        "should_give": should_give,
+        "gave": gave,
+        "payment_types": payment_types,
+        "teacher": teacher
+    })
+    return response
+
+
+def plan():
+    url = f"http://127.0.0.1:8000/students/plan/"
+    response = requests.get(url).json()
+    return response
+
+
+print(plan())

@@ -1,15 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
-class Teacher(models.Model):
-    full_name = models.CharField(max_length=50)
-    subject = models.CharField(max_length=25)
-
-    def __str__(self):
-        return f'{self.full_name} {self.subject}'
-
-
 class Student(models.Model):
     type_payment = (
         ('half_payment', 'HALF_PAYMENT'),
@@ -18,7 +9,7 @@ class Student(models.Model):
         ('payment_of_the_center', 'PAYMENT_OF_THE_CENTER'),
     )
     full_name = models.CharField(max_length=50)
-    teacher = models.ForeignKey(Teacher, on_delete=models.SET_NULL, null=True, blank=True)
+    teacher = models.CharField(max_length=50)
     should_give = models.IntegerField()  # berishi kerak
     gave = models.IntegerField(default=0)  # berdi
     payment_types = models.CharField(max_length=50, choices=type_payment)

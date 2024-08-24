@@ -1,18 +1,17 @@
+import pandas as pd
 from django.db.models import Sum, F
 from django.shortcuts import render
 from rest_framework import status
-
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import TeacherSerializers, StudentSerializers
-from .models import Teacher, Student
+from django.core.files.storage import default_storage
+
+from .serializers import StudentSerializers
+from .models import Student
 
 
 # Create your views here.
-class TeacherViewSet(ModelViewSet):
-    queryset = Teacher.objects.all()
-    serializer_class = TeacherSerializers
 
 
 class StudentViewSet(ModelViewSet):
@@ -43,11 +42,32 @@ class StudentSumView(APIView):
         })
 
 
-class HalfPaidStudentsView(APIView):
-    def get(self, request):
-        half_paid_students = Student.objects.filter(gave__lt=F('should_give'))
-        serializer = StudentSerializers(half_paid_students, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class UploadExcelView(APIView):
+    def post(self, request):
+        file = request.FILES['file']
+        file_name = default_storage.save(file.name, file)
+        file_path = default_storage.path(file_name)
+
+        try:
+            data = pd.read_excel(file_path)
+            for _, row in data.iterrows():
+                student_data = {
+                    'full_name': row["full_name"],
+                    'teacher': row["teacher"],
+                    'should_give': row['should_give'],
+                    'gave': row['gave'],
+                    'payment_types': row["payment_types"],
+                }
+                serializer = StudentSerializers(data=student_data)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DebtorListView(APIView):
@@ -69,7 +89,7 @@ class TotalAmountOwedView(APIView):
 
 
 class StudentsByTeacherView(APIView):
-    def get(self, request, teacher_id):
-        students = Student.objects.filter(teacher_id=teacher_id)
+    def get(self, request, teacher):
+        students = Student.objects.filter(teacher=teacher)
         serializer = StudentSerializers(students, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
